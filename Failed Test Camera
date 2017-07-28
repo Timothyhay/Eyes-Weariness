@@ -1,0 +1,77 @@
+// 实现将拍下来的图片缩放一倍
+    IplImage* DoPyrDown(IplImage* image, int filter = CV_GAUSSIAN_5x5)
+    {
+        // 设置大小缩小一倍
+        CvSize size = cvSize(image->width / 2,image->height / 2);
+        //初始化图片
+        IplImage* outImage = cvCreateImage(size,image->depth,image->nChannels);
+        //实现缩放
+        cvPyrDown(image,outImage);
+        cvReleaseImage(&image);
+        return outImage;
+    }
+
+
+
+int main(int argc, char *argv[])
+{
+
+        cvNamedWindow("video");
+        CvCapture* capture;
+         // 首先是要通过摄像设备来得到一个CvCapture对象
+        if(1 == argc)
+        {
+            capture = cvCreateCameraCapture(-1);
+            //capture = cvCaptureFromCAM(0);
+        }
+        else
+        {
+            capture = cvCreateCameraCapture(atoi(argv[1]));
+        }
+
+        assert(NULL != capture);
+
+        IplImage* frame;
+
+        char keyCode;
+        // 每隔30ms捕捉一次视频图像
+        // 可以设为while(1)  使得实时捕捉视频画面
+        Sleep(2000);
+        while((keyCode = cvWaitKey(30)))
+        {
+            //表示按下了ESC键，退出
+            if(keyCode == 27)
+            {
+                break;
+            }
+
+            //表示按下了回车键，此时应当保存照片
+            if(keyCode == 13)
+            {
+                //初始化一张图片
+                IplImage* outImage = cvCreateImage(cvGetSize(frame),frame->depth,frame->nChannels);
+                // 将原图拷贝过来
+                cvCopy(frame,outImage,NULL);
+                //实现缩放操作
+                outImage = DoPyrDown(outImage);
+                //设置保存的图片名称和格式
+                const char* outImageName = "test.jpg";
+                //保存图片
+                cvSaveImage(outImageName,outImage);
+                cvReleaseImage(&outImage);
+                printf("Image Saved\n");
+            }
+
+            // 得到摄像设备的下一帧图像
+            frame = cvQueryFrame(capture);
+            if(!frame)
+            {
+                break;
+            }
+            cvShowImage("video",frame);
+        }
+
+        cvReleaseImage(&frame);
+        cvDestroyAllWindows();
+        return 0;
+    }
