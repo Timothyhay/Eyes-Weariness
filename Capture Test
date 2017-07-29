@@ -1,0 +1,45 @@
+int main(int argc, char *argv[])
+{
+       //From Camera
+       VideoCapture capture(0);
+
+       //From LoaclAdd
+       //VideoCapture capture("E:\\ProgramProjects\\SRTP\\FaceVideo2.wmv");
+       if(!capture.isOpened())
+       {
+           cout<<"Open Video Failed."<<endl;
+           return -1;
+       }
+
+       bool stop(false);
+       char key;
+       char filename[256] = "Pic_0.jpg";
+       int cont = 1;
+       while (!stop)
+       {
+           Mat frame;
+           //capture >> frame;
+           if(!capture.read(frame))
+               break;
+           imshow("VideoCapture", frame);
+           key = waitKey(30);
+
+           //ESC
+           if(key == 27)
+           {
+               cout<<"Now Exit.."<<endl;
+               break;
+           }
+
+           //Space
+           if(key == 32)
+           {
+                sprintf(filename,"E:\\ProgramProjects\\SRTP\\SavedMedia\\Pic_%d.jpg",cont++);
+                imwrite(filename,frame);
+                imshow(filename,frame);
+                cout<<"Picture Captured!"<<endl;
+           }
+
+       }
+       return 0;
+}
